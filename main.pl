@@ -3,7 +3,6 @@ use 5.010;
 use strict;
 
 use Mojolicious::Lite;
-use EndPoint::EndPointGenerator;
 use WebRender::JsonRender;
 use Command::CommandFactory;
 use Utils::WebUtils;
@@ -32,19 +31,13 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
         return;
     }
     
-    $client->send(WebRender::JsonRender::generate_result
-                    (
-                        Utils::Constants::RESULT_CODE_SUCCESS, 
-                        $message
-                    )
-                 );
+    $client->send();
     $c->render(text => WebRender::JsonRender::generate_result(Utils::Constants::RESULT_CODE_SUCCESS));
 };
 
 websocket '/webpush' => sub {
     my $c = shift;
     my $ws = $c->tx;
-    my $endpoint = EndPoint::EndPointGenerator::generate();
 
     # Websocket connection opened
     $log->debug('WebSocket connection opened');
@@ -57,12 +50,11 @@ websocket '/webpush' => sub {
     # Incoming message
     $c->on(message => sub {
       my ($c, $msg) = @_;
-      my $incoming_message_ref = Utils::WebUtils::json_to_ref($msg);
-      my $command = $incoming_message_ref->{command};
-      my $content = $incoming_message_ref->{content};
-      my $command_handler = Command::CommandFactory->get_instance($command);
-      
-      $command_handler->execute($c, $endpoint, $content);
+      my $request_message = Utils::WebUtils::json_to_ref($msg);
+      my $command = Command::CommandFactory->create($request_message);
+
+      $command->ws_client($c);
+      $command->execute();
     });
 
     # Closed
