@@ -2,10 +2,9 @@ package Command::BaseCommand;
 
 use strict;
 use warnings;
+use 5.010;
 
 use Exporter qw(import);
-
-my $_ws_client;
 
 sub new {
     my $class = shift;
@@ -22,3 +21,15 @@ sub ws_client {
 
     return $this->{ws_client};
 }
+
+sub online_clients {
+    my $this = shift;
+    
+    if (@_) {
+        $this->{online_clients} = shift;
+    }
+
+    return $this->{online_clients};
+}
+
+1;

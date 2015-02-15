@@ -38,6 +38,7 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
 websocket '/webpush' => sub {
     my $c = shift;
     my $ws = $c->tx;
+    my $endpoint = "1223shdj23";
 
     # Websocket connection opened
     $log->debug('WebSocket connection opened');
@@ -54,6 +55,7 @@ websocket '/webpush' => sub {
       my $command = Command::CommandFactory->create($request_message);
 
       $command->ws_client($c);
+      $command->online_clients($clients);
       $command->execute();
     });
 
@@ -83,7 +85,7 @@ __DATA__
       };
 
       // Outgoing messages
-      window.setInterval(function () { ws.send('{"command": "Register", "content": ""}') }, 4000);
+      window.setInterval(function () { ws.send('{"messageType": "hello"}') }, 4000);
     </script>
   </body>
 </html>

@@ -2,6 +2,7 @@ package Command::CommandFactory;
 
 use strict;
 use warnings;
+use 5.010;
 
 use Exporter qw(import);
 
