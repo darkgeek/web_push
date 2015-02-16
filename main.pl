@@ -38,7 +38,6 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
 websocket '/webpush' => sub {
     my $c = shift;
     my $ws = $c->tx;
-    my $endpoint = "1223shdj23";
 
     # Websocket connection opened
     $log->debug('WebSocket connection opened');
@@ -46,15 +45,13 @@ websocket '/webpush' => sub {
     # Increase inactivity timeout for connection a bit
     $c->inactivity_timeout(300);
     
-    $clients->{$endpoint} = $ws;
-
     # Incoming message
     $c->on(message => sub {
       my ($c, $msg) = @_;
       my $request_message = Utils::WebUtils::json_to_ref($msg);
       my $command = Command::CommandFactory->create($request_message);
 
-      $command->ws_client($c);
+      $command->ws_client($ws);
       $command->online_clients($clients);
       $command->execute();
     });
