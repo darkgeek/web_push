@@ -14,7 +14,7 @@ our @EXPORT_OK = qw/
 
 sub get_connection {
     my $config = shift;
-    my $redis = Redis->new($config);
+    my $redis = defined $config ? Redis->new($config) : Redis->new;
 
     return $redis;
 }
