@@ -28,7 +28,7 @@ sub remove_channel {
     my $this = shift;
 
     my $chanid = shift;
-    my $uaid = shift;
+    my $uaid = $this->get_user_agent_by_channel($chanid);
     my $conn = get_connection();
     my $action = sub {
                         $conn->del("chanid:$chanid");
@@ -71,6 +71,16 @@ sub is_user_agent_exists {
     my $conn = get_connection();
     
     return $conn->exists("uaid:$uaid");
+}
+
+sub get_channels_by_user_agent {
+    my $this = shift;
+
+    my $uaid = shift;
+    my $conn = get_connection();
+    my @chanids = $conn->smembers("uaid:$uaid");
+
+    return @chanids;
 }
 
 sub get_user_agent_by_channel {

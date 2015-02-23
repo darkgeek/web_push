@@ -38,6 +38,7 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
 websocket '/webpush' => sub {
     my $c = shift;
     my $ws = $c->tx;
+    my $connection_shared_data = {};
 
     # Websocket connection opened
     $log->debug('WebSocket connection opened');
@@ -53,6 +54,7 @@ websocket '/webpush' => sub {
 
       $command->ws_client($ws);
       $command->online_clients($clients);
+      $command->connection_shared_data($connection_shared_data);
       $command->execute();
     });
 
@@ -60,7 +62,7 @@ websocket '/webpush' => sub {
     $c->on(finish => sub {
       my ($c, $code, $reason) = @_;
 
-      delete $clients->{$endpoint};
+      delete $clients->{$connection_shared_data->{uaid}};
       $c->app->log->debug("WebSocket closed with status $code");
     });
 };
@@ -82,7 +84,7 @@ __DATA__
       };
 
       // Outgoing messages
-      window.setInterval(function () { ws.send('{"messageType": "hello"}') }, 4000);
+      window.setInterval(function () { ws.send('{"messageType": "hello","uaid":"fd52438f-1c49-41e0-a2e4-98e49833cc9c","channelIDs": ["431b4391-c78f-429a-a134-f890b5adc0bb", "a7695fa0-9623-4890-9c08-cce0231e4b36"]}') }, 4000);
     </script>
   </body>
 </html>

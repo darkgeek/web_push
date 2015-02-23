@@ -32,4 +32,14 @@ sub online_clients {
     return $this->{online_clients};
 }
 
+sub connection_shared_data {
+    my $this = shift;
+    
+    if (@_) {
+        $this->{connection_shared_data} = shift;
+    }
+
+    return $this->{connection_shared_data};
+}
+
 1;
