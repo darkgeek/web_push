@@ -13,33 +13,25 @@ sub new {
 }
 
 sub ws_client {
-    my $this = shift;
-    
-    if (@_) {
-        $this->{ws_client} = shift;
-    }
-
-    return $this->{ws_client};
+    return _set_object_field(shift, 'ws_client', shift);
 }
 
 sub online_clients {
-    my $this = shift;
-    
-    if (@_) {
-        $this->{online_clients} = shift;
-    }
-
-    return $this->{online_clients};
+    return _set_object_field(shift, 'online_clients', shift);
 }
 
 sub connection_shared_data {
-    my $this = shift;
-    
-    if (@_) {
-        $this->{connection_shared_data} = shift;
-    }
+    return _set_object_field(shift, 'connection_shared_data', shift);
+}
 
-    return $this->{connection_shared_data};
+sub _set_object_field {
+    my $obj = shift;
+    my $field_name = shift;
+    my $field_value = shift;
+    
+    $obj->{$field_name} = $field_value if defined $field_value;
+
+    return $obj->{$field_name};
 }
 
 1;

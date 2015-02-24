@@ -7,11 +7,11 @@ use 5.010;
 use Exporter qw(import);
 our @EXPORT_OK = qw/
                 generate_endpoint
-                generate_channelid
                 generate_uaid
               /;
 
 use UUID::Tiny ':std';
+use Utils::Constants;
 
 sub generate_uaid {
     my $uaid = create_uuid_as_string(UUID_V4);
@@ -19,14 +19,10 @@ sub generate_uaid {
     return $uaid;
 }
 
-sub generate_channelid {
-    my $channel_id = create_uuid_as_string(UUID_V4);
-
-    return $channel_id;
-}
-
 sub generate_endpoint {
+    my $chanid = shift;
 
+    return Utils::Constants::SERVER_ADDRESS.$chanid;
 }
 
 1;

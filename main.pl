@@ -26,13 +26,13 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
     unless ($client) {
         $log->info("Endpoint $endpoint doesn't exist anymore. Cease here.");
         $c->render(
-            text => WebRender::JsonRender::generate_result(Utils::Constants::RESULT_CODE_INVALID_ENDPOINT_ERROR)
+            text => WebRender::JsonRender::generate_result(222)
         );
         return;
     }
     
     $client->send();
-    $c->render(text => WebRender::JsonRender::generate_result(Utils::Constants::RESULT_CODE_SUCCESS));
+    $c->render(text => WebRender::JsonRender::generate_result(Utils::Constants::STATUS_CODE_SUCCESS));
 };
 
 websocket '/webpush' => sub {
@@ -75,6 +75,8 @@ __DATA__
 <html>
   <head><title>Echo</title></head>
   <body>
+  <button id="hello-btn">Say hello</button>
+  <button id="add-channel-btn" onclick="addChannel()">Add channel</button>
     <script>
       var ws = new WebSocket('<%= url_for('webpush')->to_abs %>');
 
@@ -85,6 +87,12 @@ __DATA__
 
       // Outgoing messages
       window.setInterval(function () { ws.send('{"messageType": "hello","uaid":"fd52438f-1c49-41e0-a2e4-98e49833cc9c","channelIDs": ["431b4391-c78f-429a-a134-f890b5adc0bb", "a7695fa0-9623-4890-9c08-cce0231e4b36"]}') }, 4000);
+
+      function addChannel() {
+        ws.send('{"messageType": "register", "channelID": "d9b74644-4f97-46aa-b8fa-9393985cd6cd"}');
+      }
+
+      //document.getElementById('add-channel-btn').addEventListener("click", addChannel);
     </script>
   </body>
 </html>

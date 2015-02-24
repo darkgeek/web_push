@@ -16,6 +16,7 @@ my $message_service = Service::MessageService->new();
 
 sub execute {
     my $this = shift;
+
     my $request_message = $this->{request_message};
     my $ws = $this->{ws_client};
     my $clients = $this->{online_clients};
@@ -35,8 +36,8 @@ sub execute {
         for my $chanid (@$chanids) {
             my $index = 0;
 
-            $index++ until $stored_chanids[$index] eq $chanid;
             # Remove duplicated channel id from @stored_chanids
+            $index++ until $stored_chanids[$index] eq $chanid;
             splice(@stored_chanids, $index, 1);
         }
         # Remove the stored channels that are not listed in "channelIDs" field in this Hello Message

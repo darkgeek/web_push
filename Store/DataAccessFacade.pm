@@ -5,6 +5,7 @@ use warnings;
 use 5.010;
 
 use Store::RedisStoreProvider qw(get_connection commit_transaction);
+use Utils::Constants;
 
 use Exporter qw(import);
 
@@ -16,6 +17,12 @@ sub add_channel {
     my $chanid = shift;
     my $uaid = shift;
     my $conn = get_connection();
+    my $is_chanid_exists = $conn->exists("chanid:$chanid");
+
+    if ($is_chanid_exists) {
+        return Utils::Constants::STATUS_CODE_CONFLICT_CHANNELID_ERROR;
+    }
+
     my $action = sub {
                         $conn->hset("chanid:$chanid", 'uaid' => $uaid);
                         $conn->sadd("uaid:$uaid", $chanid);

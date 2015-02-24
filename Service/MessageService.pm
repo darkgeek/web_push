@@ -28,4 +28,13 @@ sub remove_chanid {
     return $data_access_facade->remove_channel($chanid);
 }
 
+sub add_chanid {
+    my $this = shift;
+
+    my $chanid = shift;
+    my $uaid = shift;
+
+    return $data_access_facade->add_channel($chanid, $uaid);
+}
+
 1;
