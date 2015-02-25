@@ -5,7 +5,7 @@ use warnings;
 use 5.010;
 
 use Store::RedisStoreProvider qw(get_connection commit_transaction);
-use Utils::Constants;
+use Utils::WebUtils qw(get_logger);
 
 use Exporter qw(import);
 
@@ -16,11 +16,16 @@ sub add_channel {
 
     my $chanid = shift;
     my $uaid = shift;
+    use constant {
+        RESULT_CODE_SUCCESS => 0,
+        RESULT_CODE_FAILED_TRANSACTION_ERROR => 1,
+        RESULT_CODE_CONFLICT_CHANNELID_ERROR => 2,
+    };
     my $conn = get_connection();
     my $is_chanid_exists = $conn->exists("chanid:$chanid");
 
     if ($is_chanid_exists) {
-        return Utils::Constants::STATUS_CODE_CONFLICT_CHANNELID_ERROR;
+        return RESULT_CODE_CONFLICT_CHANNELID_ERROR;
     }
 
     my $action = sub {
@@ -28,7 +33,15 @@ sub add_channel {
                         $conn->sadd("uaid:$uaid", $chanid);
                  };
     
-    commit_transaction($action, $conn);
+    my @replies = commit_transaction($action, $conn);
+
+    get_logger()->debug("Replies: @replies");
+
+    if (_has_failure(@replies)) {
+        return RESULT_CODE_FAILED_TRANSACTION_ERROR;
+    }
+
+    return RESULT_CODE_SUCCESS;
 }
 
 sub remove_channel {
@@ -36,13 +49,29 @@ sub remove_channel {
 
     my $chanid = shift;
     my $uaid = $this->get_user_agent_by_channel($chanid);
+    use constant {
+        RESULT_CODE_SUCCESS => 0,
+        RESULT_CODE_FAILED_TRANSACTION_ERROR => 1,
+    };
+    unless (defined $uaid) {
+        return RESULT_CODE_FAILED_TRANSACTION_ERROR;
+    }
+
     my $conn = get_connection();
     my $action = sub {
                         $conn->del("chanid:$chanid");
                         $conn->srem("uaid:$uaid", $chanid);
                  };
     
-    commit_transaction($action, $conn);
+    my @replies = commit_transaction($action, $conn);
+
+    get_logger()->debug("Replies: @replies");
+
+    if (_has_failure(@replies)) {
+        return RESULT_CODE_FAILED_TRANSACTION_ERROR;
+    }
+
+    return RESULT_CODE_SUCCESS;
 }
 
 sub update_channel_version {
@@ -114,6 +143,19 @@ sub _get_attribute_by_channel {
     my $conn = get_connection();
 
     return $conn->hget("chanid:$chanid", $attr);
+}
+
+sub _has_failure {
+    my $has_failure = 0;
+
+    for my $reply (@_) {
+        unless ($reply) {
+            $has_failure = 1;
+            last;
+        }
+    }
+
+    return $has_failure;
 }
 
 1;

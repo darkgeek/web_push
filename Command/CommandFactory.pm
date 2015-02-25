@@ -10,8 +10,8 @@ sub create {
     my $class = shift;
     my $request_message = shift;
     my $needed_type = $request_message->{messageType};
-    say "[messageType] shouldn't be empty" unless defined $needed_type;
 
+    $needed_type = 'ping' unless defined $needed_type;
     $needed_type = _get_command_name($needed_type);
     my $location = "Command/$needed_type"."Command.pm";
     my $clazz = "Command::$needed_type"."Command";

@@ -28,9 +28,15 @@ sub execute {
     my $status = $message_service->add_chanid($request_channid, $uaid);
     my $endpoint = '';
     
-    unless (Utils::Constants::STATUS_CODE_CONFLICT_CHANNELID_ERROR eq $status) {
+    if (0 eq $status) {
         $status = Utils::Constants::STATUS_CODE_SUCCESS;
         $endpoint = generate_endpoint($request_channid);
+    }
+    elsif (1 eq $status) {
+        $status = Utils::Constants::STATUS_CODE_INTERNAL_SERVER_ERROR;
+    }
+    elsif (2 eq $status) {
+        $status = Utils::Constants::STATUS_CODE_CONFLICT_CHANNELID_ERROR;
     }
     
     $respond->{messageType} = $request_message->{messageType};

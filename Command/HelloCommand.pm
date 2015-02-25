@@ -11,6 +11,7 @@ use parent 'Command::BaseCommand';
 use Security::UniformIDGenerator qw(generate_uaid);
 use WebRender::JsonRender qw(convert_to_json);
 use Service::MessageService;
+use Utils::WebUtils qw(get_logger);
 
 my $message_service = Service::MessageService->new();
 
@@ -37,8 +38,17 @@ sub execute {
             my $index = 0;
 
             # Remove duplicated channel id from @stored_chanids
-            $index++ until $stored_chanids[$index] eq $chanid;
-            splice(@stored_chanids, $index, 1);
+            until($stored_chanids[$index] eq $chanid || $index > @stored_chanids) {
+                $index++;
+            }
+
+            if ($index <= @stored_chanids) {
+                get_logger()->debug("channel to remove: $index, $chanid");
+                splice(@stored_chanids, $index, 1);
+            }
+            else {
+                get_logger()->debug("channel to discard since it was not stored: $index, $chanid");
+            }
         }
         # Remove the stored channels that are not listed in "channelIDs" field in this Hello Message
         for my $stored_chanid_to_be_removed (@stored_chanids) {
