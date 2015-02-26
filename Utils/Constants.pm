@@ -15,6 +15,8 @@ use constant STATUS_CODE_CONFLICT_CHANNELID_ERROR => 409;
 
 use constant STATUS_CODE_INTERNAL_SERVER_ERROR => 500;
 
+use constant MESSAGE_QUEUE_EVENT_ACK => 'ack';
+
 use constant SERVER_ADDRESS => 'http://127.0.0.1:3000/';
 
 1;

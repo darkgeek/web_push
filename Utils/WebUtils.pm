@@ -9,6 +9,7 @@ use JSON -convert_blessed_universally;
 our @EXPORT_OK = qw/
                     json_to_ref
                     get_logger
+                    set_object_field
                  /;
 
 sub json_to_ref {
@@ -32,5 +33,14 @@ sub get_logger {
     return $log;
 }
 
+sub set_object_field {
+    my $obj = shift;
+    my $field_name = shift;
+    my $field_value = shift;
+    
+    $obj->{$field_name} = $field_value if defined $field_value;
+
+    return $obj->{$field_name};
+}
 
 1;
