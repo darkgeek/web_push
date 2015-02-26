@@ -38,11 +38,12 @@ sub execute {
             my $index = 0;
 
             # Remove duplicated channel id from @stored_chanids
-            until($stored_chanids[$index] eq $chanid || $index > @stored_chanids) {
+            for my $stored (@stored_chanids) {
+                last if $stored eq $chanid;
                 $index++;
             }
 
-            if ($index <= @stored_chanids) {
+            if ($index < @stored_chanids) {
                 get_logger()->debug("channel to remove: $index, $chanid");
                 splice(@stored_chanids, $index, 1);
             }

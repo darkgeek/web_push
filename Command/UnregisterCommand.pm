@@ -24,6 +24,11 @@ sub execute {
     my $result = $message_service->remove_chanid($request_channid);
     my $status = Utils::Constants::STATUS_CODE_SUCCESS;
     
+    unless (defined $ws) {
+        say "{ws_client} is needed and shouldn't be empty. Aborted.";
+        return;
+    }
+    
     if (1 eq $result) {
         $status = Utils::Constants::STATUS_CODE_INTERNAL_SERVER_ERROR;
     }

@@ -19,6 +19,11 @@ sub execute {
     my $ws = $this->{ws_client};
     my $respond = {};
 
+    unless (defined $ws) {
+        say "{ws_client} is needed and shouldn't be empty. Aborted.";
+        return;
+    }
+    
     $ws->send(convert_to_json($respond));
 }
 

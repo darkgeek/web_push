@@ -28,6 +28,11 @@ sub execute {
     my $status = $message_service->add_chanid($request_channid, $uaid);
     my $endpoint = '';
     
+    unless (defined $ws) {
+        say "{ws_client} is needed and shouldn't be empty. Aborted.";
+        return;
+    }
+    
     if (0 eq $status) {
         $status = Utils::Constants::STATUS_CODE_SUCCESS;
         $endpoint = generate_endpoint($request_channid);
