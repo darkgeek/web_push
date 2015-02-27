@@ -25,4 +25,8 @@ sub connection_shared_data {
     return set_object_field(shift, 'connection_shared_data', shift);
 }
 
+sub message_queue {
+    return set_object_field(shift, 'message_queue', shift);
+}
+
 1;

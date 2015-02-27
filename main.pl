@@ -3,12 +3,23 @@ use 5.010;
 use strict;
 
 use Mojolicious::Lite;
-use WebRender::JsonRender;
+use WebRender::JsonRender qw(convert_to_json);
 use Command::CommandFactory;
 use Utils::WebUtils;
+use Security::UniformIDGenerator qw(parse_uaid);
+use Command::NotificationCommand;
+use Service::MessageService;
+use Message::MessageQueue;
+use DateTime;
+use Mojo::IOLoop;
 
 my $log = Mojo::Log->new;
+my $message_queue = Message::MessageQueue->new;
 my $clients = {};
+my $id = Mojo::IOLoop->recurring(30 => sub {
+    say "run.";
+    $message_queue->remove();
+});
 
 # Template with browser-side code
 get '/' => 'index';
@@ -18,21 +29,29 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
     my $endpoint = $c->stash('endpoint');
     my $validation = $c->validation;
 
-    $validation->required('message')->size(1,50);
+    $validation->required('version');
 
-    my $message = $validation->param('message');
-    my $client = $clients->{$endpoint};
+    my $version = $validation->param('version');
+    my $chanid = parse_uaid($endpoint);
+    my $message_service = Service::MessageService->new();
+    my $uaid = $message_service->get_uaid_by_chanid($chanid);
+    my $client = $clients->{$uaid};
     
     unless ($client) {
         $log->info("Endpoint $endpoint doesn't exist anymore. Cease here.");
-        $c->render(
-            text => WebRender::JsonRender::generate_result(222)
-        );
+        $c->tx->res->code(Utils::Constants::STATUS_CODE_INTERNAL_SERVER_ERROR);
+        $c->render(text => '');
         return;
     }
-    
-    $client->send();
-    $c->render(text => WebRender::JsonRender::generate_result(Utils::Constants::STATUS_CODE_SUCCESS));
+
+    my $command = Command::NotificationCommand->new;
+    $command->ws_client($client);
+    $command->chanid($chanid);
+    $command->version($version);
+    $command->message_queue($message_queue);
+    $command->execute();
+
+    $c->render(text => '');
 };
 
 websocket '/webpush' => sub {
@@ -55,6 +74,7 @@ websocket '/webpush' => sub {
       $command->ws_client($ws);
       $command->online_clients($clients);
       $command->connection_shared_data($connection_shared_data);
+      $command->message_queue($message_queue);
       $command->execute();
     });
 
@@ -78,6 +98,7 @@ __DATA__
   <button id="hello-btn" onclick="hello()">Say hello</button>
   <button id="add-channel-btn" onclick="addChannel()">Add channel</button>
   <button id="remove-channel-btn" onclick="unregister()">Remove channel</button>
+  <button id="ack-btn" onclick="ack()">Ack</button><input />
     <script>
       var ws = new WebSocket('<%= url_for('webpush')->to_abs %>');
 
@@ -99,6 +120,10 @@ __DATA__
 
       function unregister() {
        ws.send('{"messageType": "unregister","channelID": "431b4391-c78f-429a-a134-f890b5adc0bb"}') 
+      }
+
+      function ack() {
+       ws.send('{"messageType": "ack","updates": [{ "channelID": "d9b74644-4f97-46aa-b8fa-9393985cd6cd", "version": 23 }]}') 
       }
     </script>
   </body>

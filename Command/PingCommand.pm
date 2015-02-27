@@ -11,8 +11,6 @@ use parent 'Command::BaseCommand';
 use WebRender::JsonRender qw(convert_to_json);
 use Service::MessageService;
 
-my $message_service = Service::MessageService->new();
-
 sub execute {
     my $this = shift; 
 

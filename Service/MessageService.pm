@@ -37,4 +37,12 @@ sub add_chanid {
     return $data_access_facade->add_channel($chanid, $uaid);
 }
 
+sub get_uaid_by_chanid {
+    my $this = shift;
+
+    my $chanid = shift;
+    
+    return $data_access_facade->get_user_agent_by_channel($chanid);
+}
+
 1;

@@ -8,6 +8,7 @@ use Exporter qw(import);
 our @EXPORT_OK = qw/
                 generate_endpoint
                 generate_uaid
+                parse_uaid
               /;
 
 use UUID::Tiny ':std';
@@ -23,6 +24,12 @@ sub generate_endpoint {
     my $chanid = shift;
 
     return Utils::Constants::SERVER_ADDRESS.$chanid;
+}
+
+sub parse_uaid {
+    my $endpoint = shift;
+
+    return $endpoint;
 }
 
 1;
