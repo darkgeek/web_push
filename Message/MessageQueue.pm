@@ -14,7 +14,6 @@ sub add {
     $item->listen_on($this);
 
     push @$queue, $item; 
-    say "after add, queue has ".@$queue." items.";
 }
 
 sub remove {
@@ -22,8 +21,11 @@ sub remove {
 
     my $item = shift @$queue;
 
-    $item->stop_listen_on($this);
-    say "after remove, queue has ".@$queue." items.";
+    if (defined $item) {
+        $item->stop_listen_on($this);
+    }
+
+    return $item;
 }
 
 sub peek {
