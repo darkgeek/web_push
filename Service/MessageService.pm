@@ -45,4 +45,21 @@ sub get_uaid_by_chanid {
     return $data_access_facade->get_user_agent_by_channel($chanid);
 }
 
+sub get_channel_version {
+    my $this = shift;
+
+    my $chanid = shift;
+
+    return $data_access_facade->get_channel_version($chanid);
+}
+
+sub update_channel_version {
+    my $this = shift;
+
+    my $chanid = shift;
+    my $version = shift;
+
+    return $data_access_facade->update_channel_version($chanid, $version);
+}
+
 1;

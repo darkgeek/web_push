@@ -40,7 +40,7 @@ sub listen_on {
         my $version = $ack->{version};
         
         get_logger()->info("Get Ack Message: chanid => $chanid, version => $version");
-        if ($this->chanid eq $chanid and $this->version le $version) {
+        if ($this->chanid eq $chanid and $this->version <= $version) {
             get_logger()->info("My chanid is ".$this->chanid.", version is ".$this->version.", so it's acked.");
             $this->is_acked(1);
         }
