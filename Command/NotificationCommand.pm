@@ -47,7 +47,7 @@ sub execute {
     my $curr_version = $message_service->get_channel_version($this->chanid);
     
     # Only increment the version
-    if ($this->version > $curr_version) {
+    if ($this->version >= $curr_version) {
         $message_service->update_channel_version($this->chanid, $this->version);
     }
     else {

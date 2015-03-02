@@ -69,6 +69,20 @@ sub execute {
     $respond->{uaid} = $uaid;
 
     $ws->send(convert_to_json($respond));
+
+    # Get all versions of channels belonging to specified uaid, and send them to clients
+    my @chanids = $message_service->get_chanids_by_uaid($uaid);
+    
+    for my $channel (@chanids) {
+        my $version = $message_service->get_channel_version($channel);
+        my $command = Command::NotificationCommand->new;
+
+        $command->ws_client($ws);
+        $command->chanid($channel);
+        $command->version($version);
+        $command->message_queue($this->message_queue);
+        $command->execute();
+    }
 }
 
 1;
