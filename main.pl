@@ -9,48 +9,16 @@ use Utils::WebUtils qw(get_logger);
 use Security::UniformIDGenerator qw(parse_uaid);
 use Command::NotificationCommand;
 use Service::MessageService;
+use Service::TaskService;
 use Message::MessageQueue;
-use Mojo::IOLoop;
 
-my $log = Mojo::Log->new;
+my $message_service = Service::MessageService->new;
 my $message_queue = Message::MessageQueue->new;
+my $task_service = Service::TaskService->new;
 my $clients = {};
-my $background_task = Mojo::IOLoop->recurring(10 => sub {
-    my $message = $message_queue->remove();
 
-    while ((defined $message) and $message->is_acked) {
-        get_logger()->info("Message [chanid => ".$message->chanid.", version => ".$message->version."] is acked. Try next.");
-        $message = $message_queue->remove();
-    }
-
-    unless (defined $message)  {
-        get_logger()->info("Empty queue.");
-        return;
-    }
-    
-    my $now_time = DateTime->now;
-    my $cmp = DateTime->compare($message->next_send_time, $now_time);
-
-    # Add the message to $message_queue again since it has not reached the time to resend
-    if ($cmp eq 1) {
-        get_logger()->info("Readd to message queue: [chanid => ".$message->chanid.", version => ".$message->version."]");
-        $message_queue->add($message);
-        return;
-    }
-
-    # Resend the message
-    my $message_service = Service::MessageService->new();
-    my $uaid = $message_service->get_uaid_by_chanid($message->chanid);
-    my $client = $clients->{$uaid};
-
-    return unless defined $client;
-    my $command = Command::NotificationCommand->new;
-    $command->ws_client($client);
-    $command->chanid($message->chanid);
-    $command->version($message->version);
-    $command->message_queue($message_queue);
-    $command->execute();
-});
+$task_service->start_message_resend_task($message_queue, $clients);
+$task_service->start_new_message_listener_task();
 
 # Template with browser-side code
 get '/' => 'index';
@@ -64,12 +32,11 @@ put '/push/:endpoint' => {endpoint => qr/\w+/} => sub {
 
     my $version = $validation->param('version');
     my $chanid = parse_uaid($endpoint);
-    my $message_service = Service::MessageService->new();
     my $uaid = $message_service->get_uaid_by_chanid($chanid);
     my $client = $clients->{$uaid};
     
     unless ($client) {
-        $log->info("Endpoint $endpoint doesn't exist anymore. Cease here.");
+        get_logger()->info("Endpoint $endpoint doesn't exist anymore. Cease here.");
         $c->tx->res->code(Utils::Constants::STATUS_CODE_INTERNAL_SERVER_ERROR);
         $c->render(text => '');
         return;
@@ -91,7 +58,7 @@ websocket '/webpush' => sub {
     my $connection_shared_data = {};
 
     # Websocket connection opened
-    $log->debug('WebSocket connection opened');
+    get_logger()->debug('WebSocket connection opened');
 
     # Increase inactivity timeout for connection a bit
     $c->inactivity_timeout(300);

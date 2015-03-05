@@ -5,6 +5,7 @@ use warnings;
 use 5.010;
 
 use Store::DataAccessFacade;
+use Utils::WebUtils qw(get_logger);
 
 use Exporter qw(import);
 
@@ -60,6 +61,23 @@ sub update_channel_version {
     my $version = shift;
 
     return $data_access_facade->update_channel_version($chanid, $version);
+}
+
+sub listen_on_new_messages {
+    my $this = shift;
+
+    my $topics = shift;
+    my $cb = shift;
+
+    return $data_access_facade->subscribe_on_topics($topics, $cb);
+}
+
+sub broadcast_new_message {
+    my $this = shift;
+    my ($uaid, $version) = @_;
+    my $message = "$version\@$uaid";
+
+    return $data_access_facade->publish_to_topic(Utils::Constants::NEW_MESSAGE_LISTENER_TOPIC, $message);
 }
 
 1;

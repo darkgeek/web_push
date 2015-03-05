@@ -137,6 +137,29 @@ sub get_channel_version {
     return _get_attribute_by_channel($chanid, 'version');
 }
 
+sub subscribe_on_topics {
+    my $this = shift;
+
+    my $topics = shift;
+    my $callback = shift;
+    my $conn = get_connection();
+
+    $conn->subscribe(
+            @$topics,
+            $callback
+    );
+
+    return $conn;
+}
+
+sub publish_to_topic {
+    my $this = shift;
+    my ($topic, $message) = @_;
+    my $conn = get_connection();
+
+    $conn->publish($topic, $message);
+}
+
 sub _get_attribute_by_channel {
     my $chanid = shift;
     my $attr = shift;

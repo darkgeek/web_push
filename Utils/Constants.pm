@@ -15,6 +15,8 @@ use constant MESSAGE_QUEUE_EVENT_ACK => 'ack';
 
 use constant NOTIFICATION_RESEND_INTERVAL_IN_MINS => 5;
 
+use constant NEW_MESSAGE_LISTENER_TOPIC => 'new_message';
+
 use constant SERVER_ADDRESS => 'http://127.0.0.1:3000/';
 
 1;
