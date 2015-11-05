@@ -29,7 +29,7 @@ sub add_channel {
     }
 
     my $action = sub {
-                        $conn->hset("chanid:$chanid", 'uaid' => $uaid, 'version' => 0);
+                        $conn->hmset("chanid:$chanid", 'uaid' => $uaid, 'version' => 0);
                         $conn->sadd("uaid:$uaid", $chanid);
                  };
     

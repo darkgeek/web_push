@@ -7,6 +7,7 @@ use 5.010;
 
 use Exporter qw(import);
 use Utils::Constants;
+use Mojo::Log;
 use JSON -convert_blessed_universally;
 
 our @EXPORT_OK = qw/
