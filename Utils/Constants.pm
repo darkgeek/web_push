@@ -19,4 +19,6 @@ use constant NEW_MESSAGE_LISTENER_TOPIC => 'new_message';
 
 use constant SERVER_ADDRESS => 'http://127.0.0.1:3000/';
 
+use constant APPSERVER_PUSH_DIR => 'push';
+
 1;

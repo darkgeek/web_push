@@ -23,7 +23,7 @@ sub generate_uaid {
 sub generate_endpoint {
     my $chanid = shift;
 
-    return Utils::Constants::SERVER_ADDRESS.$chanid;
+    return Utils::Constants::SERVER_ADDRESS."".Utils::Constants::APPSERVER_PUSH_DIR."/$chanid";
 }
 
 sub parse_uaid {
